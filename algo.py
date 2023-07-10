@@ -4,25 +4,24 @@ from scipy.optimize import linear_sum_assignment
 
 
 def assign_rooms(people, prefs_by_person):
+    '''Applies Hungarian algorithm to come up with optimal room allocation'''
     # Initialize cost matrix (negative of prefs because cost is minimized)
     prefs = np.array([prefs for prefs in prefs_by_person.values()])
-    cost = np.zeros((3, 3)) - prefs
+    cost = np.zeros((len(people),) * 2) - prefs
 
     # Apply Hungarian algorithm to find optimal assignment
     row_indices, col_indices = linear_sum_assignment(cost)
 
     # Initialize structures
-    value = {}
     assignment = {}
     for row, col in zip(row_indices, col_indices):
-        value[people[row]] = prefs[row, col]
         assignment[people[row]] = col
 
-    return value, assignment
+    return assignment
 
 
-def solve_lp(people, total_rent, values, prefs_by_person, assignment):
-    # TODO: get rid of values variable, instead use prefs_by_person and assignments
+def solve_lp(people, total_rent, prefs_by_person, assignment):
+    '''Solves a linear program to minimize max pettiness'''
     # Set up linear program
     model = LpProblem(name="room-assignment", sense=LpMinimize)
 
@@ -40,11 +39,13 @@ def solve_lp(people, total_rent, values, prefs_by_person, assignment):
                 continue
 
             # Minimize pettiness
-            model += ((values[name] - price_vars[name]) - (values[name_] - price_vars[name_]) <= y,
+            happiness = prefs_by_person[name][assignment[name]] - price_vars[name]
+            happiness_ = prefs_by_person[name_][assignment[name_]] - price_vars[name_]
+            model += (happiness - happiness_ <= y,
                       f'{name_} pettiness for {name}')
 
             # Ensure envy-freeness
-            model += ((values[name] - price_vars[name]) >= (prefs_by_person[name][assignment[name_]] - price_vars[name_]),
+            model += (happiness >= (prefs_by_person[name][assignment[name_]] - price_vars[name_]),
                       f'{name} envy for {name_}')
 
     # Ensure sum of prices is equal to rent
@@ -59,22 +60,24 @@ def solve_lp(people, total_rent, values, prefs_by_person, assignment):
     return model.variables()
 
 
-def set_rent(people, total_rent, prefs_by_person, value, assignment):
-    variables = solve_lp(people, total_rent, value, prefs_by_person, assignment)
+def set_rent(people, total_rent, prefs_by_person, assignment):
+    '''Determines how much each person should pay for their room'''
+    variables = solve_lp(people, total_rent, prefs_by_person, assignment)
 
     # Initialize price and happiness maps
     price = {}
     happiness = {}
     for var in variables:
         if 'Rent' in var.name:
-            name, value = var.name.split('\'')[0], round(var.value(), 2)
-            price[name] = value
-            happiness[name] = round(prefs_by_person[name][assignment[name]] - value, 2)
+            name, val = var.name.split('\'')[0], round(var.value(), 2)
+            price[name] = val
+            happiness[name] = round(prefs_by_person[name][assignment[name]] - val, 2)
 
     return price, happiness
 
 
 def assert_desiderata(people, prefs_by_person, assignment, price, happiness, total_rent):
+    '''Make sure the results are valid——i.e. rent is made and no one is envious'''
     # Assert rent is made
     assert(abs(sum(price.values()) - total_rent) < 0.01 * len(people))
 
@@ -87,7 +90,8 @@ def assert_desiderata(people, prefs_by_person, assignment, price, happiness, tot
 
 
 def execute(people, total_rent, prefs_by_person):
-    value, assignment = assign_rooms(people, prefs_by_person)
-    price, happiness = set_rent(people, total_rent, prefs_by_person, value, assignment)
+    '''Executes the Spliddit algorithm'''
+    assignment = assign_rooms(people, prefs_by_person)
+    price, happiness = set_rent(people, total_rent, prefs_by_person, assignment)
     assert_desiderata(people, prefs_by_person, assignment, price, happiness, total_rent)
-    return value, assignment, price, happiness
+    return assignment, price, happiness

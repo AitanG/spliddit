@@ -7,11 +7,12 @@ import time
 import algo
 
 
-fast = False
+fast_print = False
 
 
 def pr(line, skip_a_line=False, eol=True, no_trailing_newline=False):
-    if fast:
+    '''Prints line with typing effect to prevent large jumps'''
+    if fast_print:
         if skip_a_line:
             print()
 
@@ -39,7 +40,8 @@ def pr(line, skip_a_line=False, eol=True, no_trailing_newline=False):
         time.sleep(0.3)
 
 
-def collect_input(fast):
+def collect_input():
+    '''Prints instructions and interactively collects algo inputs'''
     pr('Welcome to the Spliddit rent-splitting algorithm!')
 
     pr('Spliddit finds a room allocation and sets prices for each room to ensure', skip_a_line=True, eol=False)
@@ -54,10 +56,10 @@ def collect_input(fast):
     pr('    only on personal preferences.')
     pr(' 3. Participants agree to accept the result of the algorithm without', eol=False)
     pr('    negotiation.',)
-    pr(' 4. For N participants, the non-public parts of the living space can be divided', eol=False)
+    pr(' 4. For N participants, the non-shared parts of the living space can be divided', eol=False)
     pr('    into N partitions that don\'t change based on who is assigned to what.')
 
-    pr('If any of these preconditions isn\'t met, specify by number which one(s) for', skip_a_line=True, eol=False)
+    pr('If any of these preconditions isn\'t met, specify which one(s), by number, for', skip_a_line=True, eol=False)
     pr('help on how to proceed (comma-separated). Press Enter to continue:')
     inp = input()
 
@@ -89,7 +91,7 @@ def collect_input(fast):
     pr(' 1. Total rent owed to landlord')
     pr(' 3. Unique names for each room/partition (up to 20)')
     pr(' 2. Unique names for each participant')
-    pr(' 4. Each participant\'s values for each room.')
+    pr(' 4. Each participant\'s personal values for each room.')
 
     pr('(Press Enter when ready)', skip_a_line=True)
     inp = input()
@@ -155,13 +157,18 @@ def collect_input(fast):
     return people, rooms, total_rent, prefs_by_person
 
 
-def print_optimal_assignment(rooms, value, assignment):
+def print_optimal_assignment(rooms, prefs_by_person, assignment):
+    '''Prints information about who is assigned to which room'''
     pr('Socially optimal assignment:', skip_a_line=True)
     for person, room_index in assignment.items():
-        pr(f'{person} -> {rooms[room_index]} (values at: ${value[person]})')
+        pr(f'{person} -> {rooms[room_index]} (values at: ${prefs_by_person[person][assignment[person]]})')
 
 
 def handle_rounding_issues(total_rent, price):
+    '''
+    In the case of irrational results, adds or subtracts pennies from a
+    random selection of participants to make prices add up to total rent
+    '''
     sum_prices = round(sum(price.values()), 2)
     amount_to_divide = round(abs(total_rent - sum_prices), 2)
     n = round(amount_to_divide / 0.01)
@@ -179,6 +186,7 @@ def handle_rounding_issues(total_rent, price):
 
 
 def print_final_rent(total_rent, price, assignment, rooms):
+    '''Prints information about final prices'''
     price_ = price
     optional_note = ''
     if total_rent != sum(price.values()):
@@ -191,6 +199,7 @@ def print_final_rent(total_rent, price, assignment, rooms):
 
 
 def print_envy_explanation(people, prefs_by_person, assignment, price, happiness):
+    '''Prints explanation of how the results are envy-free'''
     for name in people:
         pr(f'{name} is envy-free. At these room prices, {name}\'s happiness is {happiness[name]}. In comparison:', skip_a_line=True)
         for name_ in assignment:
@@ -202,6 +211,7 @@ def print_envy_explanation(people, prefs_by_person, assignment, price, happiness
 
 
 def print_pettiness_explanation(happiness):
+    '''Prints explanation of how the results are minimized'''
     min_happiness = min(happiness.values())
     max_happiness = max(happiness.values())
     if min_happiness == max_happiness:
@@ -211,21 +221,21 @@ def print_pettiness_explanation(happiness):
         pr(f'This means the minimum pettiness found by the model is {max_happiness - min_happiness}.')
 
 
-def print_results(people, rooms, prefs_by_person, value, assignment, price, happiness, total_rent):
-    print_optimal_assignment(rooms, value, assignment)
+def print_results(people, rooms, prefs_by_person, assignment, price, happiness, total_rent):
+    '''Prints the results of the algorithm, including explanation'''
+    print_optimal_assignment(rooms, prefs_by_person, assignment)
     print_final_rent(total_rent, price, assignment, rooms)
     print_envy_explanation(people, prefs_by_person, assignment, price, happiness)
     print_pettiness_explanation(happiness)
 
 
 def main():
-    global fast
-    fast = len(sys.argv) >= 2 and sys.argv[1] == 'fast'
-    people, rooms, total_rent, prefs_by_person = collect_input(fast)
-    # TODO: write tests
-    # people, rooms, total_rent, prefs_by_person = ['A', 'B', 'C'], ['a', 'b', 'c'], 1000, {'A': [400, 300, 300], 'B': [300, 400, 300], 'C': [300, 300, 400]}
-    value, assignment, price, happiness = algo.execute(people, total_rent, prefs_by_person)
-    print_results(people, rooms, prefs_by_person, value, assignment, price, happiness, total_rent)
+    '''Interactively runs the Spliddit algorithm and explains the results'''
+    global fast_print
+    fast_print = len(sys.argv) >= 2 and sys.argv[1] == 'fast'
+    people, rooms, total_rent, prefs_by_person = collect_input()
+    assignment, price, happiness = algo.execute(people, total_rent, prefs_by_person)
+    print_results(people, rooms, prefs_by_person, assignment, price, happiness, total_rent)
 
 
 if __name__ == '__main__':
