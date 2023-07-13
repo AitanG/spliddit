@@ -57,7 +57,7 @@ def collect_input():
     pr(' 3. Participants agree to accept the result of the algorithm without', eol=False)
     pr('    negotiation.',)
     pr(' 4. For N participants, the non-shared parts of the living space can be divided', eol=False)
-    pr('    into N partitions that don\'t change based on who is assigned to what.')
+    pr('    into N partitions that don\'t change based on who is assigned where.')
 
     pr('If any of these preconditions isn\'t met, specify which one(s), by number, for', skip_a_line=True, eol=False)
     pr('help on how to proceed (comma-separated). Press Enter to continue:')
@@ -73,7 +73,7 @@ def collect_input():
         pr('For precondition 2: Any participant who misrepresents their preferences runs', skip_a_line=True, eol=False)
         pr('the risk of ending up with an allocation they don\'t like. More', eol=False)
         pr('importantly, participants should reconsider their choice to live with someone', eol=False)
-        pr('who might be opportunistic.')
+        pr('who might act selfishly.')
     if '3' in issues:
         pr('For precondition 3: The Spliddit algorithm makes certain guarantees in order', skip_a_line=True, eol=False)
         pr('to be fair to everyone. If everyone has faithfully reported their preferences,', eol=False)
@@ -170,18 +170,15 @@ def handle_rounding_issues(total_rent, price):
     random selection of participants to make prices add up to total rent
     '''
     sum_prices = round(sum(price.values()), 2)
-    amount_to_divide = round(abs(total_rent - sum_prices), 2)
+    amount_to_divide = round(total_rent - sum_prices, 2)
     n = round(amount_to_divide / 0.01)
-    is_extra = total_rent > sum_prices
-    extra_rent = ([(0.01 if is_extra else -0.01)] * n +
-                  [0] * (len(price) - n))
+    extra_rent = [0.01] * n + [0] * (len(price) - n)
     random.shuffle(extra_rent)
     i = 0
     price_ = {}
     for person, p in price.items():
         price_[person] = p + extra_rent[i]
         i += 1
-
     return price_, amount_to_divide
 
 
@@ -230,7 +227,7 @@ def print_results(people, rooms, prefs_by_person, assignment, price, happiness, 
 
 
 def main():
-    '''Interactively runs the Spliddit algorithm and explains the results'''
+    '''Interactively executes the Spliddit algorithm and explains the results'''
     global fast_print
     fast_print = len(sys.argv) >= 2 and sys.argv[1] == 'fast'
     people, rooms, total_rent, prefs_by_person = collect_input()
