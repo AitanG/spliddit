@@ -38,14 +38,13 @@ As a side-note, it might be non-obvious that "low pettiness" is the best objecti
 
 ## Requirements
 
-1. Each participant is able to come up with values for each room such that:
-	a. The values add up to the total rent
-	b. The participant would be equally happy with any room at those prices
-	c. The participant can afford any room at those prices.
-
-2. Participants can be trusted to report their preferences honestly and based only on personal preferences.
-3. Participants agree to accept the result of the algorithm without negotiation.
-4. For N participants, the non-shared parts of the living space can be divided into N partitions that don't change based on who is assigned where.
+* Each participant is able to come up with values for each room such that:
+	* The values add up to the total rent
+	* The participant would be equally happy with any room at those prices
+	* The participant can afford any room at those prices.
+* Participants can be trusted to report their preferences honestly and based only on personal preferences.
+* Participants agree to accept the result of the algorithm without negotiation.
+* For N participants, the non-shared parts of the living space can be divided into N partitions that don't change based on who is assigned where.
 
 ## Further reading
 
