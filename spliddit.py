@@ -23,17 +23,17 @@ def pr(line, skip_a_line=False, eol=True, no_trailing_newline=False):
         time.sleep(0.2)
         sys.stdout.write('\n\r')
         time.sleep(0.2)
-    else:
-        time.sleep(0.4)
-
+    elif not eol:
+        time.sleep(0.3)
 
     for char in line:
         sys.stdout.write(char)
-        time.sleep(random.random() / 20)
+        if char not in ' \n\r\t':
+            time.sleep(random.random() / 20)
+
         sys.stdout.flush()
 
     if not no_trailing_newline:
-        time.sleep(0.2)
         sys.stdout.write('\n\r')
 
     if eol:
@@ -148,7 +148,7 @@ def collect_input():
                 continue
 
             if max(prefs_by_person[person]) - min(prefs_by_person[person]) >= total_rent / (len(people) - 1):
-                pr(f'Spliddit doesn\'t work if a person values a room at (total rent / {len(people) - 1}) or more. Try again...')
+                pr(f'Spliddit doesn\'t work if a person values a room (total rent / {len(people) - 1}) more than another room. Try again...')
                 prefs_by_person[person] = list()
                 continue
 
