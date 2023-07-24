@@ -12,9 +12,9 @@ The `fast` option skips the typing animation.
 
 ## How to split rent
 
-Spliddit is arguably the best way to decide rent and room allocation under most circumstances. Other common ways of doing this, such as negotiating and dividing by floor area, have glaring issues. The main issue with negotiating is that some people are more willing and/or able to negotiate than others. This might be seen as a good thing for those who are good negotiators, but unequal outcomes in room assignment are apt to create envy or resentment.
+Spliddit is arguably the best way to decide rent and room allocation under most circumstances. Other strategies, like negotiation and going by floor area, have critical flaws. The problem with negotiating is that some people are more willing and/or able to negotiate than others. This might be seen as a good thing for those who are good negotiators, but unequal outcomes in room assignment are apt to create envy or resentment.
 
-In contrast, going by floor area provides objectivity, but it can also lead to unfair outcomes. Obviously, residents might care about many aspects of a room other than its size, and size itself doesn't correlate perfectly with utility (it's generally sublinear and doesn't account for shared spaces). Also, going by square feet doesn't provide a solution for the first step of room assignment.
+Going by floor area provides objectivity, but it can also lead to unfair outcomes. Obviously, residents might care about many aspects of a room other than its size, and size itself doesn't correlate perfectly with utility (it doesn't account for common spaces or sublinear utility). Also, going by square feet doesn't provide a solution for room assignment.
 
 Spliddit takes a third approach: using an algorithm. Although an algorithmic approach might seem opaque, impersonal, or arbitrary, the Spliddit algorithm is specifically designed to be none of those things!
 
